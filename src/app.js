@@ -8,7 +8,8 @@ const ATMURL = (new Base64()).decode(URLParse(window.location.href).hash.slice(1
 
 $(document).ready(function() {
 
-    const DataTable = $("#DATA_TABLE > tbody")
+    let DataTable = $("#DATA_TABLE > tbody")
+    let timer;
 
     DataTable.delegate("button", "click", function(){
         let uuid = $(this).parents("tr").find("td:first-child").text()
@@ -28,20 +29,33 @@ $(document).ready(function() {
         }
     }
 
+    const Fail = function() {
+        if(timer) window.clearInterval(timer);
+        $(".container").empty().append(
+            $("<div class=\"bg-danger-subtle border border-danger rounded p-3 mt-3 text-danger\">This address has expired</div>")
+        )
+    }
+
+    let requestHandle = null;
     const Pull = function(url) {
-        $.ajax({
+        if(requestHandle != null) requestHandle.abort()
+        requestHandle = $.ajax({
             url,
             jsonp: "callback",
             dataType: "jsonp",
-            data: {},
-            success: Render
-        });
+            data: {}
+        })
+            .done(Render)
+            .fail(Fail)
+            .always(function() {
+                requestHandle = null
+            })
     }
 
     $("#ADD").on("click", function() {
         let newData = {UUID:"",AMOUNT:""};
         $(this).parent().find("input").each(function(){
-            let value = $(this).val()
+            let value = $(this).val().trim();
             if(value == "") return false;
             newData[$(this).attr("name")] = value;
         })
@@ -51,9 +65,8 @@ $(document).ready(function() {
         }
     })
 
-    setInterval(() => {
+    timer = setInterval(() => {
         Pull(ATMURL);
     }, 30000);
-
     Pull(ATMURL);
 })
