@@ -19,9 +19,13 @@ $(document).ready(function() {
     const Render = function(data) {
         // console.log(data);
         DataTable.empty();
-        $.each(data, function(_, row) {
-            $("<tr><td>" + row.uuid + "</td><td>" + row.username + "</td><td class=\"text-end\">" + row.amount + "</td><td class=\"text-center\"><button class=\"btn btn-danger btn-sm\" type=\"button\">DELETE</button></td></tr>").appendTo(DataTable);
-        })
+        if(data.length > 0) {
+            $.each(data, function(_, row) {
+                $("<tr><td>" + row.uuid + "</td><td>" + row.username + "</td><td class=\"text-end\">" + row.amount + "</td><td class=\"text-center\"><button class=\"btn btn-danger btn-sm\" type=\"button\">DELETE</button></td></tr>").appendTo(DataTable);
+            })
+        } else {
+            $("<tr><td class=\"text-center\" colspan=\"4\"><em>No data</em></td></tr>").appendTo(DataTable);
+        }
     }
 
     const Pull = function(url) {
